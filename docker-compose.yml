@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Servicio 1: Nuestra base de datos Híbrida (Grafo + Vector)
   neo4j_db:
