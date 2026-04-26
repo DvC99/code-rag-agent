@@ -21,4 +21,5 @@ class CodeFile(BaseModel):
     path: str = Field(..., description="The relative path of the file in the repository")
     content: str = Field(..., description="The raw content of the file")
     language: str = Field(..., description="The programming language of the file")
+    repository_name: str = Field(..., description="The name of the repository the file belongs to")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional file metadata")

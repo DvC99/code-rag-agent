@@ -52,7 +52,8 @@ class GithubAdapter:
                             CodeFile(
                                 path=path,
                                 content=content_file.decoded_content.decode("utf-8"),
-                                language=item.path.split('.')[-1] or "Unknown",
+                                language=content_file.language or "Unknown",
+                                repository_name=repo_full_name,
                                 metadata={"sha": item.sha}
                             )
                         )
