@@ -5,6 +5,7 @@ import logging
 
 from app.core.config import settings
 from app.infrastructure.github_client import GithubAdapter
+from app.infrastructure.neo4j_store import Neo4jAdapter
 from app.rag.indexer import CodeIndexer
 
 logger = logging.getLogger(__name__)
@@ -22,18 +23,19 @@ async def ingest_repository(request: IngestRequest) -> Dict[str, Any]:
     
     try:
         # 1. Infrastructure: Extract code from GitHub
-        # We instantiate the adapter with the token from settings
         github_adapter = GithubAdapter(github_token=settings.GITHUB_TOKEN)
         code_files = await github_adapter.extract_repo(repo_url)
         
         # Extract a simple name for the repository from the URL for the indexer
-        # Example: 'https://github.com/owner/repo' -> 'owner/repo'
         repo_name = repo_url.rstrip("/").split("/")[-2:]
         repo_identifier = "/".join(repo_name) if len(repo_name) == 2 else repo_url
 
-        # 2. RAG Core: Index the extracted files into Neo4j
-        indexer = CodeIndexer()
-        indexer.index_repository(repository_name=repo_identifier, code_files=code_files)
+        # 2. Infrastructure: Database Connection Adapter
+        neo4j_adapter = Neo4jAdapter()
+
+        # 3. RAG Core: Index the extracted files using the adapter (Dependency Injection)
+        indexer = CodeIndexer(neo4j_adapter=neo4j_adapter)
+        await indexer.index_repository(repository_name=repo_identifier, code_files=code_files)
         
         return {
             "message": "Ingesta completada",

@@ -41,7 +41,7 @@ class GithubAdapter:
             
             code_files: List[CodeFile] = []
             
-            for item in tree:
+            for item in tree.tree:
                 if item.type == "blob":
                     path = item.path
                     if any(path.endswith(ext) for ext in self._allowed_extensions):
@@ -52,7 +52,7 @@ class GithubAdapter:
                             CodeFile(
                                 path=path,
                                 content=content_file.decoded_content.decode("utf-8"),
-                                language=content_file.language or "Unknown",
+                                language=item.path.split('.')[-1] or "Unknown",
                                 metadata={"sha": item.sha}
                             )
                         )
