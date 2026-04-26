@@ -20,7 +20,7 @@ class Neo4jAdapter:
                 url=self.uri,
                 username=self.username,
                 password=self.password,
-                embedding_dimension=1536,
+                embedding_dimension=768,
                 index_name="code_index",
                 node_label="CodeChunk",
                 text_node_property="text"

@@ -19,7 +19,7 @@ pydantic-settings = "^2.3.4"
 numpy = ">=2.1.0"
 llama-index-graph-stores-neo4j = "^0.7.0"
 llama-index-vector-stores-neo4jvector = "^0.6.0"
-llama-index-embeddings-google = "*"
+llama-index-embeddings-gemini = "*"
 llama-index-llms-gemini = "*"
 
 [build-system]

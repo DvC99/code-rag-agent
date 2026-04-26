@@ -2,8 +2,8 @@ import logging
 import asyncio
 from typing import List
 from llama_index.core import Document, VectorStoreIndex, StorageContext, Settings
-from llama_index.embeddings.google import GooglePaLMEmbedding
-from llama_index.llms.google import Gemini
+from llama_index.llms.gemini import Gemini
+from llama_index.embeddings.gemini import GeminiEmbedding
 from app.domain.models import CodeFile
 from app.infrastructure.neo4j_store import Neo4jAdapter
 from app.core.config import settings
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class CodeIndexer:
     """
     Handles the indexing of source code into a hybrid Vector-Graph store using LlamaIndex and Neo4j.
-    Configured to use Google Gemini for embeddings and LLM.
+    Configured to use Gemini 1.5 Flash and text-embedding-004.
     """
 
     def __init__(self, neo4j_adapter: Neo4jAdapter) -> None:
@@ -21,26 +21,27 @@ class CodeIndexer:
         Settings.chunk_size = 512
         Settings.chunk_overlap = 50
         
-        # 2. Configure Google Gemini with explicit model names to avoid 404s
+        # 2. Explicitly configure Gemini 1.5 models to avoid deprecation errors (404)
         try:
-            # Use 'models/gemini-pro' explicitly as it is the most stable
+            # Using gemini-1.5-flash: Extremely fast and optimized for RAG
             Settings.llm = Gemini(
-                model_name="models/gemini-pro", 
+                model="models/gemini-1.5-flash", 
                 api_key=settings.GOOGLE_API_KEY
             )
             
-            # Use GooglePaLMEmbedding (which typically maps to the stable embedding model)
-            Settings.embed_model = GooglePaLMEmbedding(
+            # Using text-embedding-004: The latest Google embedding model (dimension 768)
+            Settings.embed_model = GeminiEmbedding(
+                model_name="models/text-embedding-004",
                 api_key=settings.GOOGLE_API_KEY
             )
-            logger.info("LlamaIndex configured with explicit Google Gemini models.")
+            logger.info("LlamaIndex configured with Gemini 1.5 Flash and text-embedding-004.")
         except Exception as e:
-            logger.error(f"Failed to configure Google AI: {str(e)}")
-            raise RuntimeError(f"Google API configuration failed: {str(e)}")
+            logger.error(f"Failed to configure Google AI models: {str(e)}")
+            raise RuntimeError(f"Google AI configuration failed: {str(e)}")
 
         self._vector_store = neo4j_adapter.get_vector_store()
         self._batch_size = 50 
-        logger.info("CodeIndexer initialized with batch processing and Google AI.")
+        logger.info("CodeIndexer initialized with batch processing and Gemini 1.5.")
 
     async def index_repository(self, repository_name: str, code_files: List[CodeFile]) -> None:
         """
@@ -75,7 +76,7 @@ class CodeIndexer:
                 documents,
                 storage_context=storage_context
             )
-            logger.info("Indexación completada exitosamente con Google AI.")
+            logger.info("Indexación completada exitosamente con Gemini 1.5.")
         except Exception as e:
             logger.error(f"Indexing failed for repository {repository_name}: {str(e)}")
             raise RuntimeError(f"An error occurred while indexing the repository: {str(e)}") from e

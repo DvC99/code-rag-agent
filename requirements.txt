@@ -8,7 +8,7 @@ pydantic-settings==2.3.4
 llama-index==0.10.43
 llama-index-graph-stores-neo4j==0.1.4
 llama-index-vector-stores-neo4jvector==0.1.4
-llama-index-embeddings-google
+llama-index-embeddings-gemini
 llama-index-llms-gemini
 
 # Infraestructura & Integraciones
