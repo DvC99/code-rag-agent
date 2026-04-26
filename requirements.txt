@@ -1,0 +1,13 @@
+# Web Framework
+fastapi==0.111.0
+uvicorn==0.30.1
+pydantic==2.7.4
+
+# RAG & IA
+llama-index==0.10.43
+llama-index-graph-stores-neo4j==0.1.4
+
+# Infraestructura & Integraciones
+pygithub==2.3.0
+neo4j==5.21.0
+python-dotenv==1.0.1
