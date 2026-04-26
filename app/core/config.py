@@ -20,6 +20,8 @@ class Settings:
     
     # LLM Provider
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     
     # Neo4j Database
     NEO4J_URI: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
@@ -33,20 +35,17 @@ class Settings:
     @classmethod
     def validate(cls) -> None:
         """
-        Validates that all critical environment variables are present.
-        Raises ValueError if any critical variable is missing.
+        Validates that at least one critical LLM API key is present and GitHub token exists.
         """
-        critical_vars = {
-            "GITHUB_TOKEN": cls.GITHUB_TOKEN,
-            "OPENAI_API_KEY": cls.OPENAI_API_KEY,
-        }
-        
-        missing_vars = [var for var, value in critical_vars.items() if not value]
-        
-        if missing_vars:
-            error_msg = f"Missing critical environment variables: {', '.join(missing_vars)}"
-            logger.critical(error_msg)
-            raise ValueError(error_msg)
+        # GitHub token is always required
+        if not cls.GITHUB_TOKEN:
+            logger.critical("Missing critical environment variable: GITHUB_TOKEN")
+            raise ValueError("Missing critical environment variable: GITHUB_TOKEN")
+
+        # At least one LLM provider must be configured
+        if not any([cls.OPENAI_API_KEY, cls.GOOGLE_API_KEY, cls.ANTHROPIC_API_KEY]):
+            logger.critical("Missing critical environment variables: No LLM API key provided (OpenAI, Google, or Anthropic)")
+            raise ValueError("No LLM API key provided. Please set OPENAI_API_KEY or GOOGLE_API_KEY in .env")
             
         logger.info("Environment configuration validated successfully.")
 

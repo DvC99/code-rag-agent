@@ -15,7 +15,23 @@ class GithubAdapter:
     def __init__(self, github_token: str) -> None:
         self._token = github_token
         self._gh = Github(self._token)
-        self._allowed_extensions = {".py", ".java", ".ts", ".js", ".md", ".html", ".css"}
+        self._extension_map = {
+            ".py": "Python",
+            ".java": "Java",
+            ".ts": "TypeScript",
+            ".js": "JavaScript",
+            ".md": "Markdown",
+            ".html": "HTML",
+            ".css": "CSS"
+        }
+        self._allowed_extensions = set(self._extension_map.keys())
+
+    def _get_language(self, path: str) -> str:
+        """Infers the language based on the file extension."""
+        for ext, lang in self._extension_map.items():
+            if path.endswith(ext):
+                return lang
+        return "Unknown"
 
     def _parse_repo_url(self, repo_url: str) -> str:
         """
@@ -52,7 +68,7 @@ class GithubAdapter:
                             CodeFile(
                                 path=path,
                                 content=content_file.decoded_content.decode("utf-8"),
-                                language=content_file.language or "Unknown",
+                                language=self._get_language(path),
                                 repository_name=repo_full_name,
                                 metadata={"sha": item.sha}
                             )
